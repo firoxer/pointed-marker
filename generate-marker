@@ -1,0 +1,84 @@
+#!/bin/bash
+#
+# Generate a pointed marker according to specifications given in STDIN
+
+MARKER_TEMPLATE_NAME=template.png
+MARKER_DIR=markers
+TMP_DIR=tmp
+
+# Validate and prepare configuration parameters
+
+if [[ "$#" -ne 5 ]]; then
+  echo "Wrong number of arguments (5 required)"
+  exit 1
+fi
+
+label=$1
+label_length=${#label}
+if [[ "$label_length" -lt 1 && "$label_length" -gt 3 ]]; then
+  echo "Label not of correct length"
+  exit 1
+fi
+
+rotation=$2
+if [[ -z "$rotation" || "$rotation" -lt 0 || "$rotation" -gt 360 ]]; then
+  echo "Bad rotation"
+  exit 1
+fi
+
+size=$3
+if [[ -z "$size" || "$size" -lt 0 ]]; then
+  echo "Bad size"
+  exit 1
+fi
+
+marker_color=$4
+marker_color_length=${#marker_color}
+if [[ "$marker_color_length" -ne 6 ]]; then
+  echo "Bad marker color"
+  exit 1
+fi
+
+label_color=$5
+label_color_length=${#label_color}
+if [[ "$label_color_length" -ne 6 ]]; then
+  echo "Bad label color"
+  exit 1
+fi
+
+# Label point size depends on the length of the label
+template_size=$(identify -format '%w' $MARKER_TEMPLATE_NAME)
+case $label_length in
+  1)
+    pointsize=$(expr $template_size / 10 \* 5)
+    ;;
+  2)
+    pointsize=$(expr $template_size / 10 \* 4)
+    ;;
+  3)
+    pointsize=$(expr $template_size / 10 \* 3)
+    ;;
+esac
+
+# Generate label layer
+convert -font Liberation-Sans-Bold -pointsize $pointsize -gravity center \
+  -fill "#$label_color" -background transparent "label:$label" \
+  "$TMP_DIR/$label-$label_color.png"
+
+# Rotate template
+convert $MARKER_TEMPLATE_NAME -distort SRT "$rotation" \
+  "$TMP_DIR/template-$rotation.png"
+
+file_path="$MARKER_DIR/$label-$rotation-$size-$marker_color-$label_color.png"
+# Colorize the marker
+convert "$TMP_DIR/template-$rotation.png" +level-colors "#$marker_color", \
+  "$TMP_DIR/template-$rotation-$marker_color.png"
+# Merge the label layer and the rotated template
+composite -gravity center "$TMP_DIR/$label-$label_color.png" \
+  "$TMP_DIR/template-$rotation-$marker_color.png" "$file_path"
+# Resize the marker
+convert "$file_path" -resize "$size" "$file_path"
+
+# Delete temporary files
+rm "$TMP_DIR/$label-$label_color.png"
+rm "$TMP_DIR/template-$rotation-$marker_color.png"
