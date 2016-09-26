@@ -6,6 +6,9 @@ MARKER_TEMPLATE_NAME=template.png
 MARKER_DIR=markers
 TMP_DIR=tmp
 
+mkdir -p $MARKER_DIR
+mkdir -p $TMP_DIR
+
 # Validate and prepare configuration parameters
 
 if [[ "$#" -ne 5 ]]; then
