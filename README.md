@@ -11,6 +11,9 @@ You may try the script on my server. Open [this link](http://pointed-marker.orib
 
 Sample image generated with `http://pointed-marker.oriba.xyz/?label=A&size=80&rotation=75&marker_color=FF0000&label_color=FFFFFF`
 
+### Prerequisites
+
+You should have installed ImageMagick, ensured that the font Liberation Sans Bold is available (or changed the font in `generate-marker`), cloned the repository, and checked that the user running the script has execute rights to the repository directory.
 
 ### CLI
 
@@ -21,7 +24,6 @@ To run the script, execute it with five arguments:
 0. size (pixels)
 0. marker color (hex)
 0. label color (hex)
-
 
 ### Web
 
